@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1762290156 source:c:\users\sol15\documents\programacion ii, 2c2025\trabajo integrador programacion\trabajo oficial\tpanalisis\funciones.cpp
+	<iostream>
+	"Funciones.h"
+
+1762287448 c:\users\sol15\documents\programacion ii, 2c2025\trabajo integrador programacion\trabajo oficial\tpanalisis\funciones.h
+	<string>
+
+1762290481 source:c:\users\sol15\documents\programacion ii, 2c2025\trabajo integrador programacion\trabajo oficial\tpanalisis\menu.cpp
+	<iostream>
+	<cstdlib>
+	"Menu.h"
+
+1762287448 c:\users\sol15\documents\programacion ii, 2c2025\trabajo integrador programacion\trabajo oficial\tpanalisis\menu.h
+	"Funciones.h"
+
+1762287448 source:c:\users\sol15\documents\programacion ii, 2c2025\trabajo integrador programacion\trabajo oficial\tpanalisis\main.cpp
+	"Menu.h"
+
