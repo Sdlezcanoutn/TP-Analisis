@@ -2,22 +2,23 @@
 #include <string>
 using namespace std;
 
-// Constantes
-const int CANTIDAD_BANCOS = 3;
-const int CANTIDAD_ANIOS  = 3;
-const float CAPITAL_INICIAL = 850000.0f;
-const int ANIO_ACTUAL = 2025;
+// Constantes base
+const int CANT_BANCOS = 3;
+const int CANT_ANIOS  = 3;
+const int ANIO_BASE   = 2025;
 
-// Estructura
+// Estructura básica
 struct Banco {
     string nombre;
-    float tasasAnual[CANTIDAD_ANIOS];
-    float promedio;
+    float  tasas[CANT_ANIOS];  // 3 tasas históricas
+    float  promedio;           // promedio de las tasas
 };
 
 // Prototipos
-void cargarNombreBancos(Banco vBancos[]);
-void cargarTasaAnual(Banco vBancos[]);
-void mostrarPromedios(Banco vBancos[]);
-void mostrarRendimientos(Banco vBancos[]);
+void cargarNombres(Banco bancos[]);
+void ingresarTasas(Banco bancos[]);
+void verPromedios(const Banco bancos[]);
+void verResultados(const Banco bancos[], float capital);
+
+
 
