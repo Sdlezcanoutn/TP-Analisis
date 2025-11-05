@@ -1,90 +1,97 @@
 #include <iostream>
+#include <iomanip>   // para fixed
 #include "Funciones.h"
 using namespace std;
 
-const string NOMBRE_BANCOS[CANTIDAD_BANCOS] = {"Provincia", "Nacion", "Hipotecario"};
+const string NOMBRES_FIJOS[CANT_BANCOS] = {"Provincia", "Nacion", "Hipotecario"};
 
-void cargarNombreBancos(Banco vBancos[]) {
-    for (int i = 0; i < CANTIDAD_BANCOS; i++) {
-        vBancos[i].nombre = NOMBRE_BANCOS[i];
+// ACA CARGAMOS LOS NOMBRES DE LOS BANCOS YA ESTIPULADOS
+void cargarNombres(Banco bancos[]) {
+    for (int i = 0; i < CANT_BANCOS; i++) {
+        bancos[i].nombre = NOMBRES_FIJOS[i];
     }
 }
 
-void cargarTasaAnual(Banco vBancos[]) {
-    for (int i = 0; i < CANTIDAD_BANCOS; i++) {
-        cout << "\nIngrese las tasas anuales (%) de los ultimos " << CANTIDAD_ANIOS
-             << " anios para el Banco " << vBancos[i].nombre << ":\n";
-        float suma = 0;
-        for (int j = 0; j < CANTIDAD_ANIOS; j++) {
-            cout << "  Anio " << (ANIO_ACTUAL - j) << ": ";
-            cin >> vBancos[i].tasasAnual[j];
-            suma += vBancos[i].tasasAnual[j];
+// ACA PEDIMOS LOS 3 VALORES HISTORICOS POR BANCO
+void ingresarTasas(Banco bancos[]) {
+    for (int i = 0; i < CANT_BANCOS; i++) {
+        cout << "\nBanco: " << bancos[i].nombre << "\n";
+        float suma = 0.0f;
+
+        // 3 ANUALES
+        for (int j = 0; j < CANT_ANIOS; j++) {
+            int anio = ANIO_BASE - (CANT_ANIOS - 1 - j);  // años más viejos primero
+            do {
+                cout << "  Tasa anual (%) " << anio << ": ";
+                cin  >> bancos[i].tasas[j];
+                if (bancos[i].tasas[j] < 0 || bancos[i].tasas[j] > 100) {
+                    cout << "  Error: ingrese un valor entre 0 y 100.\n";
+                }
+            } while (bancos[i].tasas[j] < 0 || bancos[i].tasas[j] > 100);
+
+            suma += bancos[i].tasas[j];  // SUMAMOS
         }
-        vBancos[i].promedio = suma / CANTIDAD_ANIOS;
+
+        bancos[i].promedio = suma / CANT_ANIOS;  // HACEMOS PROMEDIO
     }
 }
 
-void mostrarPromedios(Banco vBancos[]) {
-    cout << fixed;
-    cout << "\nPromedios de tasas anuales por banco:\n";
-    cout << "-------------------------------------\n";
-    for (int i = 0; i < CANTIDAD_BANCOS; i++) {
-        cout << "Banco: " << vBancos[i].nombre << "\n";
-        cout << "  Tasas ingresadas: ";
-        for (int j = 0; j < CANTIDAD_ANIOS; j++) {
-            cout << vBancos[i].tasasAnual[j];
-            if (j < CANTIDAD_ANIOS - 1) cout << " | ";
+// ACA MOSTRAMOS LAS TASAS Y PROMEDIOS POR BANCO
+void verPromedios(const Banco bancos[]) {
+    cout << fixed; //PARA QUE NO SALGA CON NOTACION CIENTIFICA
+    cout << "\n=== Tasas y promedios por banco ===\n";
+    for (int i = 0; i < CANT_BANCOS; i++) {
+        cout << "- " << bancos[i].nombre << "\n  Tasas: ";
+        for (int j = 0; j < CANT_ANIOS; j++) {
+            cout << bancos[i].tasas[j];
+            if (j < CANT_ANIOS - 1) cout << " | ";
         }
-        cout << "\n  Promedio: " << vBancos[i].promedio << "%\n\n";
+        cout << "\n  Promedio: " << bancos[i].promedio << "%\n\n";
     }
 }
 
-void mostrarRendimientos(Banco vBancos[]) {
-    cout << fixed;
-    cout << "\nRendimientos obtenidos:\n";
-    cout << "-----------------------\n";
+// CALCALAMOS POR ANUAL, TRIMESTRAL Y MENSUAL, DESPUES SE RECOMIENDO LA MEJOR OPCION
+void verResultados(const Banco bancos[], float capital) {
+    cout << fixed; //OTRA VEZ POR LA N. CIENTIFICA
+    cout << "\n=========== Resultados de inversion ===========\n";
 
-    float mejorMonto = 0;
+    float mejorMonto = -1.0f;
     string mejorBanco = "";
-    string mejorModo = "";
+    string mejorModo  = "";
 
-    for (int i = 0; i < CANTIDAD_BANCOS; i++) {
-        float i_anual = vBancos[i].promedio / 100.0f;
+    for (int i = 0; i < CANT_BANCOS; i++) {
+        float i_anual = bancos[i].promedio / 100.0f; // porcentaje a decimal
 
-        // Anual (1 a�o)
-        float gan_anual = CAPITAL_INICIAL * i_anual;
-        float final_anual = CAPITAL_INICIAL + gan_anual;
+        // ANUAL (1)
+        float final_anual = capital + capital * i_anual;
+        float gan_anual   = final_anual - capital;
 
-        // Trimestral (4 con reinversion, usando i_anual/4)
-        float capital_trim = CAPITAL_INICIAL;
-        for (int t = 1; t <= 4; t++) {
-            float ganancia_trim = capital_trim * (i_anual / 4.0f);
-            capital_trim += ganancia_trim;
+        // TRIMESTRAL (4)
+        float final_trim = capital;
+        for (int t = 0; t < 4; t++) {
+            final_trim += final_trim * (i_anual / 4.0f);
         }
-        float final_trim = capital_trim;
-        float gan_trim = final_trim - CAPITAL_INICIAL;
+        float gan_trim = final_trim - capital;
 
-        // Mensual (12 con reinversion, usando i_anual/12)
-        float capital_mens = CAPITAL_INICIAL;
-        for (int m = 1; m <= 12; m++) {
-            float ganancia_mens = capital_mens * (i_anual / 12.0f);
-            capital_mens += ganancia_mens;
+        // MENSUAL (12) (TIP: SIEMPRE VA A SER LA MEJOR OPCION)
+        float final_mens = capital;
+        for (int m = 0; m < 12; m++) {
+            final_mens += final_mens * (i_anual / 12.0f);
         }
-        float final_mens = capital_mens;
-        float gan_mens = final_mens - CAPITAL_INICIAL;
+        float gan_mens = final_mens - capital;
 
-        cout << "\nBanco: " << vBancos[i].nombre << "\n";
-        cout << "Promedio anual de tasa: " << vBancos[i].promedio << "%\n";
-        cout << "  Anual -> Monto final: $" << final_anual << " | Ganancia: $" << gan_anual << "\n";
-        cout << "  Trimestral -> Monto final: $" << final_trim << " | Ganancia: $" << gan_trim << "\n";
-        cout << "  Mensual -> Monto final: $" << final_mens << " | Ganancia: $" << gan_mens << "\n";
+        cout << "\nBanco: " << bancos[i].nombre << "\n";
+        cout << "  Anual      -> Final: $" << final_anual << " | Ganancia: $" << gan_anual << "\n";
+        cout << "  Trimestral -> Final: $" << final_trim  << " | Ganancia: $" << gan_trim  << "\n";
+        cout << "  Mensual    -> Final: $" << final_mens  << " | Ganancia: $" << gan_mens  << "\n";
 
-        if (final_anual > mejorMonto) { mejorMonto = final_anual; mejorBanco = vBancos[i].nombre; mejorModo = "Anual"; }
-        if (final_trim  > mejorMonto) { mejorMonto = final_trim;  mejorBanco = vBancos[i].nombre; mejorModo = "Trimestral"; }
-        if (final_mens  > mejorMonto) { mejorMonto = final_mens;  mejorBanco = vBancos[i].nombre; mejorModo = "Mensual"; }
+        // ACA COMPARAMOS Y GUARDAMOS LA MEJOR OPCION
+        if (final_anual > mejorMonto) { mejorMonto = final_anual; mejorBanco = bancos[i].nombre; mejorModo = "Anual"; }
+        if (final_trim  > mejorMonto) { mejorMonto = final_trim;  mejorBanco = bancos[i].nombre; mejorModo = "Trimestral"; }
+        if (final_mens  > mejorMonto) { mejorMonto = final_mens;  mejorBanco = bancos[i].nombre; mejorModo = "Mensual"; }
     }
 
-    cout << "\n-----------------------\n";
-    cout << "Recomendacion: " << mejorModo << " en Banco " << mejorBanco
-         << " con monto final $" << mejorMonto << endl << endl;
+    cout << "\n----------------------------------------------\n";
+    cout << "Recomendacion: " << mejorModo << " en " << mejorBanco
+         << " | Monto final: $" << mejorMonto << "\n\n";
 }
